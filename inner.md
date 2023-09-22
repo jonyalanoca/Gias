@@ -36,3 +36,14 @@ var consulta =
 // Ejecutar la consulta y obtener los resultados
 var resultados = consulta.ToList();
 ´´´
+
+
+
+
+
+
+
+
+
+pdf en c#
+https://products.fileformat.com/es/pdf/net/itext/
