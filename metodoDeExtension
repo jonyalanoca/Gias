@@ -1,0 +1,38 @@
+using System;
+
+public class Persona
+{
+    public string Nombre { get; set; }
+    public int Edad { get; set; }
+}
+
+public static class Extension
+{
+    public static void DuplicarEdad(this Persona p)
+    {
+        p.Edad = p.Edad * 2;
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        Persona p1 = new Persona();
+        p1.Nombre = "Jonathan";
+        p1.Edad = 22;
+
+        Console.WriteLine($"Nombre: {p1.Nombre}");
+        Console.WriteLine($"Edad original: {p1.Edad}");
+
+        p1.DuplicarEdad();
+
+        Console.WriteLine($"Edad duplicada: {p1.Edad}");
+    }
+}
+En este código, el método DuplicarEdad se encarga de duplicar la propiedad Edad del objeto Persona que se pasa como argumento. Luego, cuando llamas a p1.DuplicarEdad(), la edad de p1 se duplica y se mantiene en la instancia, por lo que puedes ver la edad duplicada en la consola después de la llamada al método.
+
+
+
+
+
