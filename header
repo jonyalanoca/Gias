@@ -1,0 +1,14 @@
+ public class HeaderFooter : PdfPageEventHelper
+        {
+            public int NroRendicion { get; set; }
+            public int? ClienteCodigo { get; set; }
+            public string ClienteRazonSocial { get; set; }
+            public HeaderFooter(int nroRendicion,int? clienteCodigo, string clienteRazonSocial)
+            {
+                NroRendicion = nroRendicion;
+                ClienteCodigo = clienteCodigo;
+                ClienteRazonSocial = clienteRazonSocial;
+            }
+            public override void OnStartPage(PdfWriter writer, Document document)
+            {
+                base.OnStartPage(writer, document);
