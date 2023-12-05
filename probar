@@ -1,0 +1,9 @@
+    agregar() {
+        this.router.navigate(['/supermercado/editarSupermercado', 0, 0]);
+    }
+ 
+    buscar2() {
+        debugger;
+        this.http.post<FeriadoVM>(this.baseUrl + 'api/FeriadoController/GetList', this.query);
+    }
+}
