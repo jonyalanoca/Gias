@@ -1,0 +1,38 @@
+<div class="col-md-6 col-lg-3">
+
+                    <div class="form-group">
+                        <label class="control-label mb-0">Provincia</label>
+                        <input id="FRM_ESTADOPEDIDO_INP_CLIENTE"
+                               class="form-control form-control-sm"
+                               [(ngModel)]="provincia"
+                               [ngbTypeahead]="searchProvincia"
+                               (selectItem)="selectedProvincia($event)"
+                               [inputFormatter]="formatterProvincia"
+                               [resultFormatter]="formatterProvincia" />
+                    </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="form-group">
+                    <label class="control-label mb-0">Localidad</label>
+                    <select id="FRM_FORMTIPOPEDIDO_SEL_TIPOPEDIDO"
+                            type="number"
+                            class="form-select form-select-sm"
+                            [(ngModel)]="feriado.idLocalidad"
+                            disabled>
+                        <option *ngFor="let localidad of localidades" [ngValue]="localidad.id">
+                            {{ localidad.nombre }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-12 col-lg-12">
+                <div class="form-group">
+                    <label class="control-label mb-0">Motivo del feriado</label>
+                    <div class="float-end">{{feriado.motivo  == undefiner?0:feriado.motivo.length }}/255</div>
+                    <textarea id="FRM_CARGAMASIVA_TXA_DESCRIPCION"
+                              class="form-control form-control-sm no-resize"
+                              [(ngModel)]="feriado.motivo"
+                              maxlength="255"></textarea>
+                </div>
+            </div>
