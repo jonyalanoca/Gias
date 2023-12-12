@@ -1,0 +1,218 @@
+export interface ElementoLista {
+    id: number;
+    nombre: string;
+    data: string;
+}
+
+import { DatePipe } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { Component } from '@angular/core';
+import { Observable } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+import { isNullOrUndefined } from 'util';
+import { ModalService } from '../services';
+
+@Component({
+})
+export class ClaseBase {
+
+    //#region Propiedades
+
+    /**
+    * Indica si debe mostrarse el formulario
+    * */
+    display: boolean = false;
+
+    //#endregion
+
+    constructor(public modalService: ModalService,
+        public http: HttpClient,
+        public datepipe: DatePipe) {
+
+    }
+
+    isEmptyList(lista) {
+        return isNullOrUndefined(lista) || lista.length == 0;
+    }
+
+    isValidNumber(n) {
+        return n > 0;
+    }
+
+    isValidDecimal(n) {
+        return n != 0;
+    }
+
+    isListElement(x) {
+        return !isNullOrUndefined(x) && x.hasOwnProperty('nombre');
+    }
+
+    urlAddParams(url: string, params: [string, string | number][]): string {
+        return url + params
+            .filter(p => !isNullOrUndefined(p[1]))
+            .map(p => p[0] + '=' + p[1].toString())
+            .reduce((anterior, actual, i) => anterior + (i == 0 ? '?' : '&') + actual, '');
+    }
+
+    isEmptyString(s: string) {
+        //return isNullOrUndefined(s) || s.trim() == '';
+        return isNullOrUndefined(s) || s == '';
+    }
+
+    firstToLowerCase(s: string) {
+        return s[0].toLowerCase() + s.substring(1);
+    }
+
+    numberToString(n: number) {
+        return n.toString().replace(".", ",");
+    }
+    stringToNumber(s: string) {
+        return Number(s.replace(",", "."));
+    }
+
+    stringToTime(s: string): Date {
+        var t = s.split(":");
+        var horas = Number(t[0]);
+        var minutos = Number(t[1]);
+        var date = new Date(null, null, null, horas, minutos);
+        return date;
+    }
+
+    timeToString(t: Date): string {
+        return this.datepipe.transform(t, "HH:MM");
+    }
+
+    dropListQueryDefault<T>(url: string) {
+        return this.dropListQuery((term: string) =>
+            !this.isEmptyString(term) ?
+                this.http.get<T[]>(this.urlAddParams(url, [['query', term]])) :
+                new Observable<T[]>());
+    }
+
+    dropListQuery<T>(action: (s: string) => Observable<T[]>) {
+        return (text$: Observable<string>) =>
+            text$.pipe(
+                debounceTime(200),
+                distinctUntilChanged(),
+                switchMap(term => action(term.trim())))
+    }
+
+    dropListLocal<T>(action: (s: string) => T[]) {
+        return (text$: Observable<string>) =>
+            text$.pipe(
+                debounceTime(200),
+                distinctUntilChanged(),
+                map(term => action(term.trim())))
+    }
+
+    isNumeric(s: string): boolean {
+        if (this.isEmptyString(s))
+            return false;
+        var res = true;
+        for (var i = 0; i < s.length; i++) {
+            var char = s.charCodeAt(i);
+            if (char < 48 || char > 57) {
+                res = false;
+            }
+        }
+        return res;
+    }
+
+    /**
+     * Funcion para operar los numeros hasta dos decimales
+     * @param s
+     */
+    parseDecimal(s: number): number {
+        if (isNullOrUndefined(s)) return 0;
+        return parseFloat(s.toFixed(2));
+    }
+}
+
+
+import { DatePipe } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { Component, Inject } from '@angular/core';
+import { BlockUI, NgBlockUI } from 'ng-block-ui';
+import { Listado, QueryBase } from '../../common/claseBase/listBase.model';
+import { ModalService } from '../services';
+import { ClaseBase } from './claseBase.component';
+
+
+@Component({
+})
+export abstract class ListaBase<T, Q extends QueryBase> extends ClaseBase {
+    @BlockUI() blockUI: NgBlockUI;
+
+    public flagSearch: boolean; //Indica si se ha realizado una busqueda
+
+    public query: Q;
+    public lista: T[];
+
+    abstract controller: string;
+    abstract validateQuery(): boolean;
+    abstract initQuery(): Q;
+
+    constructor(http: HttpClient,
+        @Inject('BASE_URL') protected baseUrl: string,
+        modalService: ModalService, datepipe: DatePipe) {
+        super(modalService, http, datepipe);
+        
+        this.lista = null;
+        this.query = this.initQuery();
+    }
+
+    config = {
+        itemsPerPage: 20,
+        currentPage: 1,
+        totalItems: 10
+    }
+    
+    totalPaginas() {
+        return Math.ceil((this.config.totalItems / this.config.itemsPerPage));
+    }
+
+    ordenarPor(columna: string) {
+        if (this.query.ordenarPor == columna) {
+            this.query.ordenAscendente = !this.query.ordenAscendente;
+        } else {
+            this.query.ordenarPor = columna;
+        }
+        this.buscar();
+    }
+
+    getList() {
+        if (this.validateQuery()) {
+            this.blockUI.start('Buscando...');
+            this.http.post<Listado<T>>(this.baseUrl + 'api/' + this.controller +'/GetList', this.query)
+                .subscribe(result => {
+                    this.lista = result.lista;
+                    this.config.totalItems = result.cantidad;
+                    this.blockUI.stop();
+                }, error => {
+                    this.modalService.ErrorComplejo(error);
+                    this.blockUI.stop();
+                });
+        }
+    }
+
+    onPageChange(page: number) {
+        this.config.currentPage = page;
+        this.query.step = this.config.itemsPerPage;
+        this.query.inicio = ((page - 1) * this.config.itemsPerPage) + 1;
+
+        this.getList();
+    }
+
+    limpiar() {
+        this.lista = null;
+        this.query = this.initQuery();
+    }
+
+    buscar() {
+        this.flagSearch = true;
+        this.config.currentPage = 1;
+        this.query.step = this.config.itemsPerPage;
+        this.query.inicio = 1;
+        this.getList();
+    }
+}
