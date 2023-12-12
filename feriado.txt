@@ -1,0 +1,363 @@
+<!-- #region Navegacion -->
+<nav aria-label="Breadcrumb" class="bg-light p-2 mb-2">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-right-fill" viewBox="0 0 16 16">
+                <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z" />
+            </svg>&nbsp;<a id="NAV_SUP_INICIO" routerLink="/inicio">Inicio</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a id="NAV_SUP_LISTAFERIADO" routerLink="/feriados/listaFeriados">Feriados</a>
+        </li>
+        <li *ngIf="!nuevo()" class="breadcrumb-item active">Editar</li>
+        <li *ngIf="nuevo()" class="breadcrumb-item active">Agregar</li>
+    </ol>
+</nav>
+<!-- #endregion -->
+
+<div class="container-fluid">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 col-lg-3">
+                <div class="form-group">
+                    <label class="control-label mb-0">Fecha</label>
+                    <date-custom idElem="FRM_FERIADOCREATE_INP_FECHA" [(model)]="feriado.fecha" [disabled]="vista()"  placeholder="Ingrese una fecha"></date-custom>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="form-group">
+                    <label class="control-label mb-0">Tipo Feriado</label>
+                    <select id="FRM_FERIADOCREATE_SEL_TIPO"
+                            type="number" class="form-select form-select-sm"
+                            [(ngModel)]="feriado.tipo"
+                            (change)="onTipoChange(feriado.tipo)"
+                            [disabled]="vista()"
+                            >
+                        <option disabled selected value="undefined">Seleccionar...</option>
+                        <option value="N"> Nacional </option>
+                        <option value="M"> Municipal </option>
+                        <option value="P"> Provincial </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+
+                <div class="form-group">
+                    <label class="control-label mb-0">Provincia</label>
+                    <input id="FRM_FERIADOCREATE_INP_PROVINCIA"
+                           class="form-control form-control-sm"
+                           [(ngModel)]="provincia"
+                           [ngbTypeahead]="searchProvincia"
+                           (selectItem)="selectedProvincia($event)"
+                           [inputFormatter]="formatterProvincia"
+                           [resultFormatter]="formatterProvincia"
+                           [disabled]="!tipoSeleccionado()"
+                           (ngModelChange)="inputChangeHandler($event)"
+                           [placeholder]="!tipoSeleccionado()?'Disponible en provincial y municipal':'Ingrese...'"/>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="form-group">
+                    <label class="control-label mb-0">Localidad</label>
+                    <input id="FRM_FERIADOCREATE_INP_LOCALIDAD"
+                           class="form-control form-control-sm"
+                           [(ngModel)]="localidad"
+                           [ngbTypeahead]="searchLocalidad"
+                           (selectItem)="selectedLocalidad($event)"
+                           [inputFormatter]="formatterLocalidad"
+                           [resultFormatter]="formatterLocalidad"
+                           [disabled]="!provinciaSeleccionada()"
+                           [placeholder]="!tipoSeleccionado()?'Disponible en provincial y municipal':(!provinciaSeleccionada()?'Seleccione una provincia':'Ingrese...')"
+                           />
+                </div>
+            </div>
+
+            <br />
+            <div class="col-md-12 col-lg-12">
+                <div class="form-group">
+                    <label class="control-label mb-0">Motivo del feriado</label>
+                    <div class="float-end">{{feriado.motivo  == undefiner?0:feriado.motivo.length }}/255</div>
+                    <textarea id="FRM_FERIADOCREATE_TXA_MOTIVO"
+                              class="form-control form-control-sm no-resize"
+                              [(ngModel)]="feriado.motivo"
+                              maxlength="255"
+                              [disabled]="vista()"
+                              placeholder="Ingrese una descripcion"></textarea>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+ <!--#endregion 
+ #region Botonera-->
+<div class="container-fluid d-print-none"
+     (window:keydown.alt.g)="guardarFeriado()"
+     (window:keydown.alt.c)="cancelar()">
+    <div class="container p-0 pb-3">
+        <div class="col-lg-12 text-end">
+            <button id="FRM_FERIADOCREATE_BTN_GUARDAR"
+                    class="btn btn-sm btn-dark col-5 col-md-2 ms-md-2 me-md-2"
+                    (click)="guardarFeriado()"
+                    *ngIf="!vista()">
+                <u>G</u>uardar
+            </button>
+            <button id="FRM_FERIADOCREATE_BTN_CANCELAR"
+                    class="btn btn-sm btn-dark col-5 offset-2 offset-md-0 col-md-2"
+                    (click)="cancelar()">
+                <u>C</u>ancelar
+            </button>
+        </div>
+    </div>
+</div>
+<!-- #endregion -->
+ <!--#region Auditoria--> 
+<div class="container-fluid" *ngIf="!nuevo()">
+    <div class="container">
+        <header class="fs-5 mb-3 border-bottom">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-patch-check" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M10.354 6.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7 8.793l2.646-2.647a.5.5 0 0 1 .708 0z" />
+                <path d="m10.273 2.513-.921-.944.715-.698.622.637.89-.011a2.89 2.89 0 0 1 2.924 2.924l-.01.89.636.622a2.89 2.89 0 0 1 0 4.134l-.637.622.011.89a2.89 2.89 0 0 1-2.924 2.924l-.89-.01-.622.636a2.89 2.89 0 0 1-4.134 0l-.622-.637-.89.011a2.89 2.89 0 0 1-2.924-2.924l.01-.89-.636-.622a2.89 2.89 0 0 1 0-4.134l.637-.622-.011-.89a2.89 2.89 0 0 1 2.924-2.924l.89.01.622-.636a2.89 2.89 0 0 1 4.134 0l-.715.698a1.89 1.89 0 0 0-2.704 0l-.92.944-1.32-.016a1.89 1.89 0 0 0-1.911 1.912l.016 1.318-.944.921a1.89 1.89 0 0 0 0 2.704l.944.92-.016 1.32a1.89 1.89 0 0 0 1.912 1.911l1.318-.016.921.944a1.89 1.89 0 0 0 2.704 0l.92-.944 1.32.016a1.89 1.89 0 0 0 1.911-1.912l-.016-1.318.944-.921a1.89 1.89 0 0 0 0-2.704l-.944-.92.016-1.32a1.89 1.89 0 0 0-1.912-1.911l-1.318.016z" />
+            </svg>&nbsp;Auditor&iacute;a
+        </header>
+        <div class="row">
+            <div class="col-lg-2">
+                <div class="form-group">
+                    <label class="control-label mb-0">ID </label>
+                    <span class="form-control form-control-sm text-end">{{feriado.idFeriado}}&nbsp;</span>
+
+                </div>
+            </div>
+            <div class="col-6 col-lg-2">
+                <div class="form-group">
+                    <label class="control-label mb-0">Usuario Alta</label>
+                    <span class="form-control form-control-sm">{{feriado.usuarioAlta}}&nbsp;</span>
+                </div>
+            </div>
+            <div class="col-6 col-lg-2">
+                <div class="form-group">
+                    <label class="control-label mb-0">Usuario &Uacute;lt Modif.</label>
+                    <span class="form-control form-control-sm">{{feriado.usuarioModificacion}}&nbsp;</span>
+                </div>
+            </div>
+            <div class="col-6 col-lg-2">
+                <div class="form-group">
+                    <label class="control-label mb-0">Alta</label>
+                    <span class="form-control form-control-sm text-end">{{feriado.fechaAlta | date:'dd/MM/yyyy'}}&nbsp;</span>
+                </div>
+            </div>
+            <div class="col-6 col-lg-2">
+                <div class="form-group">
+                    <label class="control-label mb-0">&Uacute;ltima Modif.</label>
+                    <span class="form-control form-control-sm text-end">{{feriado.fechaModificacion | date:'dd/MM/yyyy'}}&nbsp;</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- #endregion -->
+
+
+
+
+
+
+import { DatePipe, Time } from "@angular/common";
+import { HttpClient } from "@angular/common/http";
+import { Component, Inject } from "@angular/core";
+import { ActivatedRoute, Router } from "@angular/router";
+import { NumericLiteral } from "typescript";
+import { ListaBase } from "../../../common/claseBase/listBase.component";
+import { QueryBase } from "../../../common/claseBase/listBase.model";
+import { ModalService } from "../../../common/services";
+import { SecurityService } from "../../../common/services/security.service";
+import { NgbDateStruct, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
+import { ClaseBase } from "../../../common/claseBase/claseBase.component";
+import { BlockUI, NgBlockUI } from "ng-block-ui";
+import { OAuthService } from "angular-oauth2-oidc";
+import { FeriadoVM, Query } from "../feriado.model";
+import { ElementoLista } from "../../../common/model/common.model";
+import { Observable } from "rxjs";
+import { debug } from "util";
+
+
+@Component({
+    selector: 'app-EditarFeriado.component',
+    templateUrl: './editarFeriado.component.html',
+})
+
+export class EditarFeriado extends ClaseBase {
+    @BlockUI() blockUI: NgBlockUI;
+    title = 'editarSupermercado';
+
+    public idFeriado: number;
+    public baseURL: string;
+    public feriado: FeriadoVM;
+    public vistaf: number;
+    public localidades: ElementoLista[];
+    public provincias: ElementoLista[];
+    public tiposFeriados: ElementoLista[];
+    public provinciaSelec: boolean;
+    public tipoSel: boolean;
+
+    public provincia: ElementoLista;
+    public localidad: ElementoLista;
+    constructor(http: HttpClient,
+        @Inject('BASE_URL') baseUrl: string,
+        private router: Router,
+        private activatedRoute: ActivatedRoute,
+        private oauthService: OAuthService,
+        public securityService: SecurityService,
+        modalService: ModalService, datepipe: DatePipe,
+        private ngbDateParserFormatter: NgbDateParserFormatter    ) {
+        super(modalService, http, datepipe);
+
+        this.baseURL = baseUrl;
+        this.provinciaSelec = false;
+        this.idFeriado = +activatedRoute.snapshot.paramMap.get('id');
+        this.vistaf = +activatedRoute.snapshot.paramMap.get('modo');
+        this.feriado = {} as FeriadoVM;
+        this.provincia = {} as ElementoLista;
+        if (this.idFeriado != 0) {
+            this.blockUI.start("Cargado datos del feriado...");
+            this.http.get<FeriadoVM>(this.baseURL + 'api/FeriadoController/GetFeriadoById?idFeriado=' + this.idFeriado)
+                .subscribe(result => {
+                    this.feriado = result;
+                    this.provincia = { id: result.idProvincia, nombre: result.nombreProvincia } as ElementoLista;
+                    this.localidad = { id: result.idLocalidad, nombre: result.nombreLocalidad } as ElementoLista;
+                    this.blockUI.stop();
+                }, error => {
+                    this.modalService.ErrorComplejo(error);
+                    this.blockUI.stop();
+                    this.cancelar();
+                });
+        }
+
+    }
+    cancelar() {
+        this.router.navigate(['feriados/listaFeriados']);
+
+    }
+    initQuery() {
+        return {
+            ordenarPor: "fecha",
+            ordenAscendente: true,
+            fecha: null
+        } as Query;
+    }
+
+    validateQuery() {
+        if (this.feriado.fecha == null ) {
+            this.modalService.MessageBox("Se debe ingresar una Fecha.");
+            return false;
+        }
+        if (!this.validarFecha(this.feriado.fecha)) {
+            this.modalService.MessageBox("La fecha no tiene el formato correcto");
+            return false;
+        }
+        if (this.feriado.tipo == null) {
+            this.modalService.MessageBox("Se debe ingresar un Tipo.");
+            return false;
+        }
+        if (this.feriado.tipo != "N" && (this.feriado.idProvincia == null || this.feriado.idLocalidad == null)) {
+            this.modalService.MessageBox("La Provincia  y Localidad son obligatorias para Municipal o Provincial.");
+            return false
+        }
+        if (this.feriado.motivo == null || this.feriado.motivo =="") {
+            this.modalService.MessageBox("Se debe ingresar un Motivo.");
+            return false;
+        }
+
+        return true;
+    }
+
+    vista(): boolean {
+        return this.vistaf == 1;
+    }
+    guardarFeriado() {
+        this.feriado.idLocalidad = (this.localidad == undefined) ? null : this.localidad.id;
+        this.feriado.idProvincia = (this.provincia == undefined) ? null : this.provincia.id;
+        if (this.validateQuery()) {
+            this.blockUI.start('Guardando...');
+            this.http.post<boolean>(this.baseURL + 'api/FeriadoController/AddOrUpdateFeriado', this.feriado)
+                .subscribe(result => {
+                    this.modalService.MessageBox("Se guard&oacute; el Feriado con &eacute;xito.");
+                    this.blockUI.stop();
+                    this.cancelar();
+                }, error => {
+                    this.modalService.ErrorComplejo(error);
+                    this.blockUI.stop();
+                });
+        }
+    }
+    
+
+    nuevo() {
+        return this.idFeriado == 0;
+    }
+    provinciaSeleccionada(event: any): boolean {
+        return this.provincia.id > 0 && !this.vista();
+    }
+    tipoSeleccionado(event: any): boolean {
+        return this.feriado.tipo != undefined && !this.vista() && this.feriado.tipo!="N";
+    }
+    //#region busquedaProvincia
+    searchProvincia = this.dropListQueryDefault<ElementoLista>('api/Autcomplete/getProvincia');
+    
+    formatterProvincia = (x: ElementoLista) => x.nombre;
+
+    selectedProvincia(event) {
+
+        this.provincia = event.item;
+        this.provinciaSelec = true;
+
+    }
+    inputChangeHandler(event: any) {
+        if (this.feriado.idProvincia == undefined) {
+            this.localidad = {} as ElementoLista;
+        }
+    }
+    //#endregion
+    //#region busquedaLocalidad
+    dropListQueryLocalidad<T>(url: string) {
+        return this.dropListQuery((term: string) =>
+            !this.isEmptyString(term) ?
+                this.http.get<T[]>(this.urlAddParams(url, [['query', term], ['idProvincia', this.provincia.id]])) :
+                new Observable<T[]>());
+    }
+    searchLocalidad = this.dropListQueryLocalidad<ElementoLista>('api/Autcomplete/getLocalidadByIdProvincia');
+    formatterLocalidad = (x: ElementoLista) => x.nombre;
+
+    selectedLocalidad(event) {
+        this.localidad = event.item;
+    }
+    //#endregion
+
+    
+    dateStructFormat(fecha: NgbDateStruct): string {
+        let dia = fecha.day < 10 ? "0" + fecha.day : fecha.day.toString();
+        let mes = fecha.month < 10 ? "0" + fecha.month : fecha.month.toString();
+        return `${dia}/${mes}/${fecha.year}`;
+    }
+    validarFecha(fecha: NgbDateStruct): boolean {
+        try {
+            const parsedDate = this.ngbDateParserFormatter.parse(this.dateStructFormat(fecha));
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+    onTipoChange(event: any) {
+        this.tipoSel = false;   
+        this.localidad = {} as ElementoLista;
+        this.provincia = {} as ElementoLista;
+        if (event != "N") {
+            this.tipoSel = true;
+        }
+    }
+}
+
+
+
+
