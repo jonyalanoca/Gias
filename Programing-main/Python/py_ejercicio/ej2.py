@@ -1,0 +1,5 @@
+nombre=str(input("ingrese su nombre y apellido: "))
+print(nombre.upper())
+print(nombre.lower())
+print(nombre.capitalize())
+print(nombre.title())
