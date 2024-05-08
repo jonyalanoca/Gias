@@ -18,3 +18,9 @@ INSERT INTO Regla2 VALUES('GeolocalizacionManual_CanGeolocate',	'Geolocalizació
 --Regla para Geolocalización Unificación
 INSERT INTO Regla2 VALUES('GeolocalizacionUnificar_CanList',	'Geolocalización Unificación - Ver',@idAplicacion,@idGrupoRegla)
 INSERT INTO Regla2 VALUES('GeolocalizacionUnificar_CanMerge',	'Geolocalización Unificación - Unificar',@idAplicacion,@idGrupoRegla)
+
+--Otro ejemplo
+INSERT INTO Regla2 VALUES('ManualServicioCliente_CanList',	'Manual de Servicio de Cliente - Ver',@idAplicacion,@idGrupoRegla)
+INSERT INTO Regla2 VALUES('ManualServicioCliente_CanAdd',	'Manual de Servicio de Cliente - Agregar',@idAplicacion,@idGrupoRegla)
+INSERT INTO Regla2 VALUES('ManualServicioCliente_CanEdit',	'Manual de Servicio de Cliente - Editar',@idAplicacion,@idGrupoRegla)
+INSERT INTO Regla2 VALUES('ManualServicioCliente_Export',	'Manual de Servicio de Cliente - Exportar',@idAplicacion,@idGrupoRegla)
