@@ -1,0 +1,20 @@
+--Creamos un nuevo grupo para las Geolozalizaciones
+INSERT INTO GrupoRegla2 (Nombre,Descripcion,Orden, IdAplicacion) VALUES ('Geolocalización','Geolocalizaciones de guías',13, @idAplicacion)
+
+--Insertamos las Reglas para la autorizacion del sitio
+DECLARE @idAplicacion INT
+SET @idAplicacion = (SELECT TOP 1 IdAplicacion FROM Aplicacion WHERE Nombre ='Distribucion')
+
+DECLARE @idGrupoRegla INT
+SET @idGrupoRegla = (SELECT TOP 1 idGrupoRegla FROM GrupoRegla2 WHERE Nombre ='Geolocalización')
+
+--Insertamos las Reglas
+--Reglas para Geolocalización Automatica 
+INSERT INTO Regla2 VALUES('GeolocalizacionAuto_CanList',		'Geolocalización Automatica - Ver',@idAplicacion,@idGrupoRegla)
+INSERT INTO Regla2 VALUES('GeolocalizacionAuto_CanGeolocate',	'Geolocalización Automatica - Geolocalizar',@idAplicacion,@idGrupoRegla)
+--Reglas para Geolocalización Manual
+INSERT INTO Regla2 VALUES('GeolocalizacionManual_CanList',		'Geolocalización Manual - Ver',@idAplicacion,@idGrupoRegla)
+INSERT INTO Regla2 VALUES('GeolocalizacionManual_CanGeolocate',	'Geolocalización Manual - Geolocalizar',@idAplicacion,@idGrupoRegla)
+--Regla para Geolocalización Unificación
+INSERT INTO Regla2 VALUES('GeolocalizacionUnificar_CanList',	'Geolocalización Unificación - Ver',@idAplicacion,@idGrupoRegla)
+INSERT INTO Regla2 VALUES('GeolocalizacionUnificar_CanMerge',	'Geolocalización Unificación - Unificar',@idAplicacion,@idGrupoRegla)
