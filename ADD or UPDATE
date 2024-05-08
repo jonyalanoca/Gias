@@ -1,0 +1,16 @@
+ADD or UPDATE 
+            try
+            {
+                Context.Entry(manual).State = manual.IdManualServicioLocalidadCliente.IsZeroOrNegative() ? EntityState.Added : EntityState.Modified;
+                Context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw new CustomApplicationException(Resources.CUSTOMAPPLICATIONEXCEPTION_ADDOREUPDATE_SETERROR);
+            }
+            finally
+            {
+                Context.Entry(manual).State = EntityState.Detached;
+            }
+            return true;
