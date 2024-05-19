@@ -1,0 +1,28 @@
+```c#
+private static IQueryable<ManualServicioClienteViewModel> AplicarOrdenamiento(IQueryable<ManualServicioClienteViewModel> datos, ManualServicioClienteQuery query)
+        {
+            var ordenamientos = new Dictionary<string, Expression<Func<ManualServicioClienteViewModel, object>>>
+                {
+                    { Resources.FIELD_CLIENTERAZONSOCIAL, x => x.ClienteRazonSocial },
+                    { Resources.FIELD_NUMEROGUIA, x => x.CodigoLocalidad },
+                    { Resources.FIELD_SUBCUENTA, x => x.NombreLocalidad },
+                    { Resources.FIELD_FECHAEMISION, x => x.TipoManual },
+                    { Resources.FIELD_CALLE, x => x.DiasEntrega },
+                    { Resources.FIELD_NUMERO, x => x.DiasRendicion },
+                    { Resources.FIELD_CODIGOPOSTAL, x => x.DiasPreparacion },
+                    { Resources.VALUE_LOCALIDAD, x => x.NombreLocalidadCanalizadora },
+                };
+
+            // Verifica si la propiedad a ordenar está en el diccionario y aplica el ordenamiento.
+            if (ordenamientos.ContainsKey(query.OrdenarPor))
+            {
+                var ordenamiento = ordenamientos[query.OrdenarPor];
+                if (query.OrdenAscendente)
+                    datos = datos.OrderBy(ordenamiento);
+                else
+                    datos = datos.OrderByDescending(ordenamiento);
+            }
+
+            return datos;
+        }
+```

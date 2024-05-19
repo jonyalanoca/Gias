@@ -1,0 +1,32 @@
+Pasos para guardar la el indice de la paguina en el storage procedure
+1- Agregar 
+    public vueltaDeEditar: boolean;
+
+2- En el contructor se debe uncluir al final de las datos cargados
+this.vueltaDeEditar = false;
+this.recargarBusqueda();
+
+en el validateQuery() antes de guardar el session storage
+validateQuery()
+{
+        if (sessionStorage.queryRecoleccion != null && this.vueltaDeEditar == true) {
+            this.vueltaDeEditar = false;
+            this.config.currentPage = this.query.pageIndex;
+            this.query.step = this.config.itemsPerPage;
+
+            this.query.inicio = (this.config.itemsPerPage * (this.config.currentPage - 1)) + 1;
+        }
+        sessionStorage.setItem("queryRecoleccion", JSON.stringify(this.query));
+}
+En el recargarBusqueda() incluirVuelta de editar en true
+    recargarBusqueda() {
+        //Si Los criterios de busqeuda estan guardados
+        if (sessionStorage.queryRecoleccion != null) {
+            this.vueltaDeEditar = true;
+            //#region Recuperamos el Objecto con los criterios de Busqueda
+            var obj = JSON.parse(sessionStorage.queryRecoleccion);
+            this.query = obj;
+            //#endregion
+            this.buscar();
+        }
+    }
