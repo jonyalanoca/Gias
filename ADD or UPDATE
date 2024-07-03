@@ -7,10 +7,19 @@ ADD or UPDATE
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                throw new CustomApplicationException(Resources.CUSTOMAPPLICATIONEXCEPTION_ADDOREUPDATE_SETERROR);
+                throw new CustomApplicationException(Resources.CUSTOMAPPLICATIONEXCEPTION_ADDOREUPDATE_SETERROR, ex);
             }
             finally
             {
                 Context.Entry(manual).State = EntityState.Detached;
             }
             return true;
+
+Actualizar solo determindas propiedades(refactorizar)
+            guia.IdDestinatario = idDestinatario;
+            guia.IdDireccion = idDireccion;
+            var entry = Context.Guia.Attach(guia);
+            entry.Property(x => x.IdDestinatario).IsModified = true;
+            entry.Property(x => x.IdDireccion).IsModified = true;
+            Context.SaveChanges();
+            Context.Entry(guia).State = EntityState.Detached;
